@@ -19,6 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Setup cache Cargo (biar compile Rust lebih cepat)
+      - name: Cache Cargo registry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       # Install Rust
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -31,11 +42,20 @@ jobs:
       - name: Install worker-build
         run: cargo install worker-build --force
 
-      # Build Rust WASM dengan bulk-memory enabled (fix error memory.copy)
-      - name: Build with bulk-memory
+      # Install binaryen (wasm-opt)
+      - name: Install binaryen
+        run: sudo apt-get install -y binaryen
+
+      # Build Rust WASM dengan bulk-memory (skip optimize bawaan)
+      - name: Build with bulk-memory (no optimize)
         run: |
           RUSTFLAGS="-C target-feature=+bulk-memory" \
-          worker-build --release
+          worker-build --release --no-optimize
+
+      # Optimize manual dengan wasm-opt (bulk-memory enabled)
+      - name: Optimize with wasm-opt
+        run: |
+          wasm-opt -O --enable-bulk-memory build/worker/shim.wasm -o build/worker/shim.wasm
 
       # Deploy ke Cloudflare
       - name: Deploy to Cloudflare
