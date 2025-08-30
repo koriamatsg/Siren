@@ -42,9 +42,12 @@ jobs:
       - name: Install worker-build
         run: cargo install worker-build --force
 
-      # Install binaryen (wasm-opt)
+      # Install binaryen (wasm-opt) terbaru
       - name: Install binaryen
-        run: sudo apt-get install -y binaryen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binaryen
+          wasm-opt --version
 
       # Build Rust WASM dengan bulk-memory
       - name: Build with bulk-memory
@@ -57,8 +60,10 @@ jobs:
         run: |
           wasm-opt -O --enable-bulk-memory build/worker/shim.wasm -o build/worker/shim.wasm
 
-      # Deploy ke Cloudflare
+      # Deploy ke Cloudflare (skip wasm-opt bawaan Wrangler)
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        env:
+          NO_WASM_OPT: 1
