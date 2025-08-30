@@ -8,12 +8,12 @@ binding = "SIREN"
 id = "a8753e6a7e624f3d8e05f29eedf7378f"
 
 [build]
-command = "cargo install worker-build && worker-build --release"
+command = "RUSTFLAGS='-C target-feature=+bulk-memory' cargo install worker-build --force && worker-build --release"
 
 [env.dev]
-build = { command = "cargo install worker-build && worker-build --dev" }
+build = { command = "RUSTFLAGS='-C target-feature=+bulk-memory' cargo install worker-build --force && worker-build --dev" }
 
 [vars]
 UUID = "f282b878-8711-45a1-8c69-5564172123c1"
 MAIN_PAGE_URL = "https://raw.githubusercontent.com/FoolVPN-ID/Siren/refs/heads/master/web/index.html"
-SUB_PAGE_URL = "https://raw.githubusercontent.com/FoolVPN-ID/Siren/refs/heads/master/web/sub.html"
+SUB_PAGE_URL  = "https://raw.githubusercontent.com/FoolVPN-ID/Siren/refs/heads/master/web/sub.html"
